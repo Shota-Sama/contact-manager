@@ -4,32 +4,40 @@ using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionFileValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 var connectionEnvironmentPath = Path.Combine(builder.Environment.ContentRootPath, "conn.env");
 if (File.Exists(connectionEnvironmentPath))
 {
-    var values = File.ReadLines(connectionEnvironmentPath)
+    connectionFileValues = File.ReadLines(connectionEnvironmentPath)
         .Select(line => line.Trim())
         .Where(line => line.Length > 0 && !line.StartsWith('#') && line.Contains('='))
         .Select(line => line.Split('=', 2))
         .ToDictionary(parts => parts[0].Trim(), parts => parts[1].Trim(), StringComparer.OrdinalIgnoreCase);
 
-    if (values.TryGetValue("DB_SERVER", out var server) &&
-        values.TryGetValue("DB_PORT", out var portText) && uint.TryParse(portText, out var port) &&
-        values.TryGetValue("DB_DATABASE", out var database) &&
-        values.TryGetValue("DB_USER", out var userId) &&
-        values.TryGetValue("DB_PASSWORD", out var password))
-    {
-        var connectionString = new MySqlConnectionStringBuilder
-        {
-            Server = server,
-            Port = port,
-            Database = database,
-            UserID = userId,
-            Password = password,
-        }.ConnectionString;
+}
 
-        builder.Configuration["ConnectionStrings:ContactDatabase"] = connectionString;
-    }
+// Environment variables are used in production hosts such as Render. The local
+// conn.env file remains a convenient fallback for development and is never committed.
+string? GetDatabaseSetting(string key) => builder.Configuration[key]
+    ?? connectionFileValues.GetValueOrDefault(key);
+
+if (string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("ContactDatabase")) &&
+    GetDatabaseSetting("DB_SERVER") is { } server &&
+    GetDatabaseSetting("DB_PORT") is { } portText && uint.TryParse(portText, out var port) &&
+    GetDatabaseSetting("DB_DATABASE") is { } database &&
+    GetDatabaseSetting("DB_USER") is { } userId &&
+    GetDatabaseSetting("DB_PASSWORD") is { } password)
+{
+    var connectionString = new MySqlConnectionStringBuilder
+    {
+        Server = server,
+        Port = port,
+        Database = database,
+        UserID = userId,
+        Password = password,
+    }.ConnectionString;
+
+    builder.Configuration["ConnectionStrings:ContactDatabase"] = connectionString;
 }
 
 builder.Services.AddControllers();

@@ -1,0 +1,7 @@
+.git
+.next
+node_modules
+ContactManager.Api/bin
+ContactManager.Api/obj
+ContactManager.Api/conn.env
+.env*
