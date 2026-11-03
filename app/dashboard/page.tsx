@@ -19,6 +19,16 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortOrder>("recent");
+  const [showInsights, setShowInsights] = useState(true);
+  const [stats, setStats] = useState<{
+    total: number;
+    withEmail: number;
+    withPhone: number;
+    withLocation: number;
+    addedThisWeek: number;
+    days: number[];
+    maxDay: number;
+  } | null>(null);
   const hydrated = useRef(false);
 
   useEffect(() => {
@@ -42,7 +52,29 @@ export default function DashboardPage() {
         }
 
         const contactsData = await contactsResponse.json();
-        setContacts(contactsData.contacts);
+        const loaded: Contact[] = contactsData.contacts;
+        setContacts(loaded);
+
+        const now = Date.now();
+        const dayMs = 24 * 60 * 60 * 1000;
+        const days: number[] = Array.from({ length: 14 }, () => 0);
+        for (const c of loaded) {
+          const d = Math.floor((now - new Date(c.createdAt).getTime()) / dayMs);
+          if (d >= 0 && d < 14) days[13 - d] += 1;
+        }
+        setStats({
+          total: loaded.length,
+          withEmail: loaded.filter((c) => c.email).length,
+          withPhone: loaded.filter((c) => c.phone).length,
+          withLocation: loaded.filter(
+            (c) => Number.isFinite(c.lat) && Number.isFinite(c.lng) && (c.lat !== 0 || c.lng !== 0),
+          ).length,
+          addedThisWeek: loaded.filter(
+            (c) => now - new Date(c.createdAt).getTime() < 7 * dayMs,
+          ).length,
+          days,
+          maxDay: Math.max(1, ...days),
+        });
       } catch (loadError) {
         setError(
           loadError instanceof Error
@@ -144,6 +176,76 @@ export default function DashboardPage() {
       </div>
 
       {error ? <p className="alert-error">{error}</p> : null}
+
+      <section className="panel p-4 sm:p-5">
+        <button
+          type="button"
+          onClick={() => setShowInsights((v) => !v)}
+          className="flex w-full items-center justify-between text-left"
+          aria-expanded={showInsights}
+        >
+          <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+            📊 Insights
+            <span className="subtle-copy ml-2 text-xs font-normal">
+              {stats ? `${stats.total} total · ${stats.addedThisWeek} added this week` : `${contacts.length} contacts`}
+            </span>
+          </h2>
+          <span className="subtle-copy text-sm">{showInsights ? "▾" : "▸"}</span>
+        </button>
+
+        {showInsights && stats && stats.total > 0 ? (
+          <>
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-50">{stats.total}</p>
+                <p className="subtle-copy text-xs">Total contacts</p>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-50">{stats.addedThisWeek}</p>
+                <p className="subtle-copy text-xs">Added this week</p>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-50">
+                  {Math.round((stats.withEmail / stats.total) * 100)}%
+                </p>
+                <p className="subtle-copy text-xs">Have an email</p>
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                  <div
+                    className="h-full rounded-full bg-blue-500 dark:bg-blue-400"
+                    style={{ width: `${(stats.withEmail / stats.total) * 100}%` }}
+                  />
+                </div>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/60">
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-50">
+                  {Math.round((stats.withLocation / stats.total) * 100)}%
+                </p>
+                <p className="subtle-copy text-xs">Pinned on map</p>
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                  <div
+                    className="h-full rounded-full bg-emerald-500 dark:bg-emerald-400"
+                    style={{ width: `${(stats.withLocation / stats.total) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <p className="subtle-copy text-xs">Contacts added — last 14 days</p>
+              <div className="mt-2 flex h-16 items-end gap-1">
+                {stats.days.map((count, i) => (
+                  <div
+                    key={i}
+                    title={`${count} added`}
+                    className="flex-1 rounded-t bg-blue-500/70 dark:bg-blue-400/60"
+                    style={{ height: `${(count / stats.maxDay) * 100}%`, minHeight: count > 0 ? "8%" : "2%" }}
+                  />
+                ))}
+              </div>
+            </div>
+          </>
+        ) : null}
+      </section>
 
       <section className="panel overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 dark:border-slate-700 sm:px-6 sm:py-5">
