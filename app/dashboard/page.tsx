@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Contact } from "@/lib/types";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     async function loadDashboard() {
@@ -53,9 +55,17 @@ export default function DashboardPage() {
     router.replace("/login");
   }
 
+  const filteredContacts = contacts.filter((contact) =>
+    [contact.name, contact.email, contact.phone, contact.address]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes(query.trim().toLowerCase()),
+  );
+
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center text-zinc-500">
+      <div className="subtle-copy flex flex-1 items-center justify-center">
         Loading dashboard...
       </div>
     );
@@ -74,7 +84,8 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
+          <ThemeToggle />
           <Link href="/dashboard/profile" className="secondary-button action-button">
             Profile
           </Link>
@@ -94,17 +105,24 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {error ? (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </p>
-      ) : null}
+      {error ? <p className="alert-error">{error}</p> : null}
 
       <section className="panel overflow-hidden">
-        <div className="border-b border-slate-200 px-6 py-5">
-          <h2 className="text-lg font-semibold text-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-6 py-5 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
             Your Contacts
+            <span className="subtle-copy ml-2 text-sm font-normal">
+              {filteredContacts.length} of {contacts.length}
+            </span>
           </h2>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search name, email, phone, address..."
+            aria-label="Search contacts"
+            className="form-input max-w-xs !py-2 text-sm"
+          />
         </div>
 
         {contacts.length === 0 ? (
@@ -118,28 +136,32 @@ export default function DashboardPage() {
             </Link>
             .
           </div>
+        ) : filteredContacts.length === 0 ? (
+          <div className="subtle-copy px-6 py-14 text-center">
+            No contacts match &ldquo;{query}&rdquo;.
+          </div>
         ) : (
-          <ul className="divide-y divide-slate-100">
-            {contacts.map((contact) => (
+          <ul className="divide-y divide-slate-100 dark:divide-slate-700/60">
+            {filteredContacts.map((contact) => (
               <li key={contact.id}>
                 <Link
                   href={`/dashboard/contacts/${contact.id}`}
-                  className="flex flex-wrap items-center justify-between gap-3 px-6 py-5 transition-colors hover:bg-slate-50"
+                  className="flex flex-wrap items-center justify-between gap-3 px-6 py-5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60"
                 >
                   <div>
-                    <p className="font-semibold text-slate-800">
+                    <p className="font-semibold text-slate-800 dark:text-slate-100">
                       {contact.name}
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       {[contact.email, contact.phone].filter(Boolean).join(" · ")}
                     </p>
                     {contact.address ? (
-                      <p className="text-sm text-slate-400">
+                      <p className="text-sm text-slate-400 dark:text-slate-500">
                         {contact.address}
                       </p>
                     ) : null}
                   </div>
-                  <span className="text-sm font-medium text-blue-600">View contact</span>
+                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400">View contact</span>
                 </Link>
               </li>
             ))}
