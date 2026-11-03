@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Login() {
   const router = useRouter();
@@ -47,6 +48,7 @@ export default function Login() {
   return (
     <div className="app-shell auth-shell">
       <div className="auth-card">
+        <ThemeToggle className="theme-toggle" />
         <p className="eyebrow">Contact Manager</p>
         <h2 className="page-title">Welcome back</h2>
         <p className="subtle-copy mt-2">Sign in to manage your contacts.</p>
@@ -86,7 +88,7 @@ export default function Login() {
           </div>
 
           {error ? (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+            <p className="alert-error">{error}</p>
           ) : null}
 
           <button

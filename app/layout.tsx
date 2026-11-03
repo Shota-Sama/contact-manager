@@ -6,13 +6,24 @@ export const metadata: Metadata = {
   description: "Manage contacts with login, dashboard, API, and OpenStreetMap.",
 };
 
+// Applies the saved (or system) theme before first paint to avoid a flash.
+const themeInit = `try {
+  var t = localStorage.getItem("theme");
+  if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+    document.documentElement.classList.add("dark");
+  }
+} catch (e) {}`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

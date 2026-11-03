@@ -85,7 +85,7 @@ export default function ProfilePage() {
               <label htmlFor="email" className="form-label">Email address</label>
               <input id="email" type="email" className="form-input" value={email} onChange={(event) => setEmail(event.target.value)} required />
             </div>
-            <div className="border-t border-slate-200 pt-5">
+            <div className="border-t border-slate-200 pt-5 dark:border-slate-700">
               <label htmlFor="current-password" className="form-label">Current password</label>
               <input id="current-password" type="password" className="form-input" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} required />
               <p className="subtle-copy mt-2 text-xs">Required to protect changes to your account.</p>
@@ -95,8 +95,8 @@ export default function ProfilePage() {
               <input id="new-password" type="password" minLength={6} className="form-input" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} />
             </div>
 
-            {error ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
-            {message ? <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{message}</p> : null}
+            {error ? <p className="alert-error">{error}</p> : null}
+            {message ? <p className="alert-success">{message}</p> : null}
 
             <button type="submit" disabled={saving} className="primary-button w-full sm:w-fit">
               {saving ? "Saving..." : "Save profile"}

@@ -77,7 +77,7 @@ export default function EditContactPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center text-zinc-500">
+      <div className="subtle-copy flex flex-1 items-center justify-center">
         Loading contact...
       </div>
     );
@@ -86,7 +86,7 @@ export default function EditContactPage() {
   if (error || !contact) {
     return (
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 py-10">
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error || "Contact not found."}</p>
+        <p className="alert-error">{error || "Contact not found."}</p>
         <Link href="/dashboard" className="text-link text-sm">
           ← Back to dashboard
         </Link>
@@ -108,9 +108,9 @@ export default function EditContactPage() {
       </div>
 
       <div className="panel p-6 sm:p-8">
-        <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
-          <p className="font-medium text-slate-700">Created by</p>
-          <p className="mt-1 text-slate-500">
+        <div className="mb-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-800/60">
+          <p className="font-medium text-slate-700 dark:text-slate-200">Created by</p>
+          <p className="mt-1 text-slate-500 dark:text-slate-400">
             {contact.createdByName || "Unknown user"}
             {contact.createdByEmail ? ` · ${contact.createdByEmail}` : ""}
           </p>

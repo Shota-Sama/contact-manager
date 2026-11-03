@@ -48,10 +48,10 @@ export default function NewContactPage() {
       <div className="contact-editor">
         <aside className="contact-editor-aside">
           <span className="feature-icon">+</span>
-          <h2 className="mt-4 text-lg font-semibold text-slate-800">Contact details</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">A name is all you need. Email, phone, address, and a map pin are optional.</p>
-          <div className="mt-6 border-t border-slate-200 pt-5 text-sm text-slate-500">
-            <p className="font-medium text-slate-700">Quick tip</p>
+          <h2 className="mt-4 text-lg font-semibold text-slate-800 dark:text-slate-100">Contact details</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">A name is all you need. Email, phone, address, and a map pin are optional.</p>
+          <div className="mt-6 border-t border-slate-200 pt-5 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+            <p className="font-medium text-slate-700 dark:text-slate-200">Quick tip</p>
             <p className="mt-1">Click anywhere on the map to fill the closest address automatically.</p>
           </div>
         </aside>

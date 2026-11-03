@@ -8,7 +8,7 @@ const DEFAULT_CENTER: [number, number] = [14.5995, 120.9842];
 const ContactMap = dynamic(() => import("./ContactMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-64 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-500">
+    <div className="flex h-64 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-400">
       Loading map...
     </div>
   ),
@@ -200,8 +200,8 @@ export default function ContactForm({
       <div className="map-section">
         <div className="mb-3 flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-slate-800">Location</p>
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Location</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           Click the map to set the contact location.
             </p>
           </div>
@@ -217,11 +217,9 @@ export default function ContactForm({
         ) : null}
       </div>
 
-      {error ? (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-      ) : null}
+      {error ? <p className="alert-error">{error}</p> : null}
 
-      <div className="flex flex-wrap gap-3 border-t border-slate-200 pt-5">
+      <div className="flex flex-wrap gap-3 border-t border-slate-200 pt-5 dark:border-slate-700">
         <button
           type="submit"
           disabled={loading}
@@ -235,7 +233,7 @@ export default function ContactForm({
             type="button"
             onClick={handleDelete}
             disabled={loading}
-            className="rounded-md border border-red-300 px-4 py-2 font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
+            className="rounded-md border border-red-300 px-4 py-2 font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
           >
             Delete
           </button>

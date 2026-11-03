@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Home() {
   return (
@@ -18,21 +19,22 @@ export default function Home() {
         <div className="grid gap-4 p-6 sm:grid-cols-2 sm:p-8">
           <div className="feature-card">
             <span className="feature-icon">01</span>
-            <h2 className="mt-4 font-semibold text-slate-800">Contacts</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="mt-4 font-semibold text-slate-800 dark:text-slate-100">Contacts</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Create, read, update, and delete contacts from your dashboard.
             </p>
           </div>
           <div className="feature-card">
             <span className="feature-icon">02</span>
-            <h2 className="mt-4 font-semibold text-slate-800">Locations</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2 className="mt-4 font-semibold text-slate-800 dark:text-slate-100">Locations</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Pin a place on the map and fill the address automatically.
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 px-6 py-5 sm:flex-row sm:justify-end sm:px-8">
+        <div className="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 px-6 py-5 dark:border-slate-700 dark:bg-slate-800/50 sm:flex-row sm:justify-end sm:px-8">
+          <ThemeToggle />
           <Link
             href="/login"
             className="primary-button action-button px-6"
