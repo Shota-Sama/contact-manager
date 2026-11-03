@@ -8,7 +8,7 @@ const DEFAULT_CENTER: [number, number] = [14.5995, 120.9842];
 const ContactMap = dynamic(() => import("./ContactMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-64 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-400">
+    <div className="flex h-64 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-400 sm:h-80">
       Loading map...
     </div>
   ),
@@ -33,6 +33,7 @@ type ContactFormProps = {
   initialValues?: Partial<ContactFormValues>;
   submitLabel: string;
   onSubmit: (values: ContactFormValues) => Promise<void>;
+  onSaveAndContinue?: (values: ContactFormValues) => Promise<void>;
   onDelete?: () => Promise<void>;
 };
 
@@ -45,22 +46,33 @@ const emptyValues: ContactFormValues = {
   lng: DEFAULT_CENTER[1],
 };
 
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 export default function ContactForm({
   initialValues,
   submitLabel,
   onSubmit,
+  onSaveAndContinue,
   onDelete,
 }: ContactFormProps) {
+  const isEditing = Boolean(initialValues);
   const [values, setValues] = useState<ContactFormValues>({
     ...emptyValues,
     ...initialValues,
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [savedStatus, setSavedStatus] = useState("");
   const [addressStatus, setAddressStatus] = useState("");
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const [copiedField, setCopiedField] = useState("");
   const latestLookup = useRef(0);
   const latestSearch = useRef(0);
   const lastLookupAt = useRef(0);
@@ -134,6 +146,17 @@ export default function ContactForm({
     }
   }
 
+  async function copyField(field: string, text: string) {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(""), 1500);
+    } catch {
+      // Clipboard unavailable — ignore.
+    }
+  }
+
   async function handleLocationChange(lat: number, lng: number) {
     setValues((current) => ({ ...current, lat, lng }));
     setAddressStatus("Finding address...");
@@ -162,10 +185,10 @@ export default function ContactForm({
     }
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submitForm() {
     setShowSuggestions(false);
     setError("");
+    setSavedStatus("");
     setLoading(true);
 
     try {
@@ -174,6 +197,41 @@ export default function ContactForm({
       setError(
         submitError instanceof Error
           ? submitError.message
+          : "Something went wrong.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await submitForm();
+  }
+
+  function handleFormKeyDown(event: KeyboardEvent<HTMLFormElement>) {
+    if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+      event.preventDefault();
+      void submitForm();
+    }
+  }
+
+  async function handleSaveAndContinue() {
+    if (!onSaveAndContinue) return;
+    setShowSuggestions(false);
+    setError("");
+    setSavedStatus("");
+    setLoading(true);
+
+    try {
+      await onSaveAndContinue(values);
+      setValues({ ...emptyValues });
+      setAddressStatus("");
+      setSavedStatus("Saved! Ready for the next contact.");
+    } catch (continueError) {
+      setError(
+        continueError instanceof Error
+          ? continueError.message
           : "Something went wrong.",
       );
     } finally {
@@ -200,8 +258,27 @@ export default function ContactForm({
     }
   }
 
+  const previewName = values.name.trim() || "New contact";
+
   return (
-    <form onSubmit={handleSubmit} className="contact-form">
+    <form onSubmit={handleSubmit} onKeyDown={handleFormKeyDown} className="contact-form">
+      {/* Live preview chip */}
+      <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800/60">
+        <span className="feature-icon !rounded-full">{initialsOf(values.name)}</span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
+            {previewName}
+          </p>
+          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+            {[values.email, values.phone].filter(Boolean).join(" · ") ||
+              "Details appear here as you type"}
+          </p>
+        </div>
+        <span className="ml-auto hidden shrink-0 text-xs text-slate-400 dark:text-slate-500 sm:inline">
+          Ctrl/⌘ + Enter to save
+        </span>
+      </div>
+
       <div className="contact-form-grid">
       <div>
         <label
@@ -213,6 +290,7 @@ export default function ContactForm({
         <input
           id="name"
           value={values.name}
+          autoFocus={!isEditing}
           onChange={(event) =>
             setValues((current) => ({ ...current, name: event.target.value }))
           }
@@ -228,15 +306,28 @@ export default function ContactForm({
         >
           Email
         </label>
-        <input
-          id="email"
-          type="email"
-          value={values.email}
-          onChange={(event) =>
-            setValues((current) => ({ ...current, email: event.target.value }))
-          }
-          className="form-input"
-        />
+        <div className="relative">
+          <input
+            id="email"
+            type="email"
+            value={values.email}
+            onChange={(event) =>
+              setValues((current) => ({ ...current, email: event.target.value }))
+            }
+            className={`form-input${values.email ? " pr-11" : ""}`}
+          />
+          {values.email ? (
+            <button
+              type="button"
+              onClick={() => void copyField("email", values.email)}
+              className="copy-button"
+              title="Copy email"
+              aria-label="Copy email"
+            >
+              {copiedField === "email" ? "✓" : "⧉"}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <div>
@@ -246,14 +337,27 @@ export default function ContactForm({
         >
           Phone
         </label>
-        <input
-          id="phone"
-          value={values.phone}
-          onChange={(event) =>
-            setValues((current) => ({ ...current, phone: event.target.value }))
-          }
-          className="form-input"
-        />
+        <div className="relative">
+          <input
+            id="phone"
+            value={values.phone}
+            onChange={(event) =>
+              setValues((current) => ({ ...current, phone: event.target.value }))
+            }
+            className={`form-input${values.phone ? " pr-11" : ""}`}
+          />
+          {values.phone ? (
+            <button
+              type="button"
+              onClick={() => void copyField("phone", values.phone)}
+              className="copy-button"
+              title="Copy phone number"
+              aria-label="Copy phone number"
+            >
+              {copiedField === "phone" ? "✓" : "⧉"}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <div className="relative sm:col-span-2">
@@ -263,21 +367,34 @@ export default function ContactForm({
         >
           Address
         </label>
-        <input
-          id="address"
-          value={values.address}
-          onChange={(event) =>
-            setValues((current) => ({
-              ...current,
-              address: event.target.value,
-            }))
-          }
-          onKeyDown={handleAddressKeyDown}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-          placeholder="Type an address, pick a suggestion..."
-          autoComplete="off"
-          className="form-input"
-        />
+        <div className="relative">
+          <input
+            id="address"
+            value={values.address}
+            onChange={(event) =>
+              setValues((current) => ({
+                ...current,
+                address: event.target.value,
+              }))
+            }
+            onKeyDown={handleAddressKeyDown}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            placeholder="Type an address, pick a suggestion..."
+            autoComplete="off"
+            className={`form-input${values.address ? " pr-11" : ""}`}
+          />
+          {values.address ? (
+            <button
+              type="button"
+              onClick={() => void copyField("address", values.address)}
+              className="copy-button"
+              title="Copy address"
+              aria-label="Copy address"
+            >
+              {copiedField === "address" ? "✓" : "⧉"}
+            </button>
+          ) : null}
+        </div>
         {showSuggestions && suggestions.length > 0 ? (
           <ul className="address-suggestions" role="listbox">
             {suggestions.map((suggestion, index) => (
@@ -322,6 +439,7 @@ export default function ContactForm({
         ) : null}
       </div>
 
+      {savedStatus ? <p className="alert-success">{savedStatus}</p> : null}
       {error ? <p className="alert-error">{error}</p> : null}
 
       <div className="flex flex-wrap gap-3 border-t border-slate-200 pt-5 dark:border-slate-700">
@@ -332,6 +450,18 @@ export default function ContactForm({
         >
           {loading ? "Saving..." : submitLabel}
         </button>
+
+        {onSaveAndContinue ? (
+          <button
+            type="button"
+            onClick={() => void handleSaveAndContinue()}
+            disabled={loading}
+            className="secondary-button action-button"
+            title="Save this contact and clear the form for the next one"
+          >
+            Save &amp; add another
+          </button>
+        ) : null}
 
         {onDelete ? (
           <button
