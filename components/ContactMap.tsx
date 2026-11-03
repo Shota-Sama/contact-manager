@@ -59,7 +59,7 @@ export default function ContactMap({
     lat || lng ? [lat, lng] : DEFAULT_CENTER;
 
   return (
-    <div className="h-64 w-full overflow-hidden rounded-md border border-zinc-300 dark:border-zinc-600">
+    <div className="h-64 w-full overflow-hidden rounded-md border border-slate-200">
       <MapContainer
         center={center}
         zoom={lat || lng ? 13 : 5}
