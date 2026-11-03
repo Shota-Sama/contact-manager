@@ -30,7 +30,6 @@ export default function NewContactPage() {
   async function handleSubmit(values: Parameters<typeof createContact>[0]) {
     await createContact(values);
     router.push("/dashboard");
-    router.refresh();
   }
 
   return (

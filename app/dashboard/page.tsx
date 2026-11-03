@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Contact } from "@/lib/types";
 import { timeAgo } from "@/lib/format";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortOrder>("recent");
+  const hydrated = useRef(false);
 
   useEffect(() => {
     async function loadDashboard() {
@@ -55,6 +56,25 @@ export default function DashboardPage() {
 
     loadDashboard();
   }, [router]);
+
+  // Restore the search filter from the URL on mount (?q=...).
+  useEffect(() => {
+    const init = setTimeout(() => {
+      const q = new URLSearchParams(window.location.search).get("q") ?? "";
+      setQuery(q);
+      hydrated.current = true;
+    }, 0);
+    return () => clearTimeout(init);
+  }, []);
+
+  // Keep the filter in the URL so Back/Forward restores it.
+  useEffect(() => {
+    if (!hydrated.current) return;
+    const url = query
+      ? `?q=${encodeURIComponent(query)}`
+      : window.location.pathname;
+    window.history.replaceState(null, "", url);
+  }, [query]);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import TopProgress from "@/components/TopProgress";
+import PageTransition from "@/components/PageTransition";
 
 export const metadata: Metadata = {
   title: "Contact Manager",
@@ -27,7 +28,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <TopProgress />
-        {children}
+        <PageTransition>{children}</PageTransition>
       </body>
     </html>
   );
