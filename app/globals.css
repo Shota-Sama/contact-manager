@@ -437,3 +437,65 @@ select.form-input {
   background: var(--surface-alt);
   color: var(--brand);
 }
+
+/* Top navigation progress bar */
+.top-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  height: 3px;
+  width: 0;
+  background: var(--brand);
+  border-radius: 0 999px 999px 0;
+  opacity: 0;
+  transition: width 300ms ease, opacity 200ms ease;
+  pointer-events: none;
+}
+
+.top-progress-active {
+  opacity: 1;
+  width: 85%;
+  animation: top-progress-crawl 900ms ease-in-out forwards;
+}
+
+@keyframes top-progress-crawl {
+  0% { width: 0; }
+  60% { width: 85%; }
+  100% { width: 100%; }
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid rgb(37 99 235 / 25%);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spinner-rotate 0.7s linear infinite;
+  vertical-align: -0.2em;
+}
+
+.spinner-lg {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-width: 3px;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Spinner inside buttons */
+.primary-button .spinner,
+.secondary-button .spinner {
+  border-color: rgb(255 255 255 / 35%);
+  border-top-color: #fff;
+  margin-right: 0.5rem;
+}
+
+.secondary-button .spinner {
+  border-color: rgb(37 99 235 / 25%);
+  border-top-color: var(--brand);
+}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import Spinner from "@/components/Spinner";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -64,7 +65,12 @@ export default function ProfilePage() {
   }
 
   if (loading) {
-    return <div className="app-shell flex flex-1 items-center justify-center subtle-copy">Loading profile...</div>;
+    return (
+      <div className="app-shell flex flex-1 flex-col items-center justify-center gap-3">
+        <Spinner className="spinner-lg" label="Loading profile" />
+        <p className="subtle-copy text-sm">Loading profile...</p>
+      </div>
+    );
   }
 
   return (

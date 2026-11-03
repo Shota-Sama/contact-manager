@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import Spinner from "./Spinner";
 
 const DEFAULT_CENTER: [number, number] = [14.5995, 120.9842];
 
@@ -448,7 +449,7 @@ export default function ContactForm({
           disabled={loading}
           className="primary-button action-button"
         >
-          {loading ? "Saving..." : submitLabel}
+          {loading ? (<><Spinner /> Saving...</>) : submitLabel}
         </button>
 
         {onSaveAndContinue ? (
@@ -459,6 +460,7 @@ export default function ContactForm({
             className="secondary-button action-button"
             title="Save this contact and clear the form for the next one"
           >
+            {loading ? <Spinner /> : null}
             Save &amp; add another
           </button>
         ) : null}

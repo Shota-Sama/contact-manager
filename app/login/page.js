@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
+import Spinner from "@/components/Spinner";
 
 export default function Login() {
   const router = useRouter();
@@ -96,7 +97,7 @@ export default function Login() {
             disabled={loading}
             className="primary-button mt-1 w-full"
           >
-            {loading ? "Logging in..." : "Log In"}
+            {loading ? (<><Spinner /> Logging in...</>) : "Log In"}
           </button>
         </form>
 
