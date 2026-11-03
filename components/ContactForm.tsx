@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 
 const DEFAULT_CENTER: [number, number] = [14.5995, 120.9842];
 
@@ -18,6 +18,12 @@ export type ContactFormValues = {
   name: string;
   email: string;
   phone: string;
+  address: string;
+  lat: number;
+  lng: number;
+};
+
+type AddressSuggestion = {
   address: string;
   lat: number;
   lng: number;
@@ -52,8 +58,81 @@ export default function ContactForm({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [addressStatus, setAddressStatus] = useState("");
+  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const latestLookup = useRef(0);
+  const latestSearch = useRef(0);
   const lastLookupAt = useRef(0);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounced address autocomplete (type -> closest matches).
+  useEffect(() => {
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    const query = values.address.trim();
+
+    searchTimer.current = setTimeout(async () => {
+      if (query.length < 3) {
+        setSuggestions([]);
+        setShowSuggestions(false);
+        return;
+      }
+
+      const searchId = ++latestSearch.current;
+      try {
+        const response = await fetch(
+          `/api/geocode/search?q=${encodeURIComponent(query)}`,
+        );
+        const data = await response.json();
+        if (searchId !== latestSearch.current) return;
+        if (response.ok && Array.isArray(data.results)) {
+          setSuggestions(data.results);
+          setActiveSuggestion(data.results.length > 0 ? 0 : -1);
+          setShowSuggestions(true);
+        }
+      } catch {
+        // Suggestions are optional — ignore failures silently.
+      }
+    }, 400);
+
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current);
+    };
+  }, [values.address]);
+
+  function selectSuggestion(suggestion: AddressSuggestion) {
+    setValues((current) => ({
+      ...current,
+      address: suggestion.address,
+      lat: suggestion.lat,
+      lng: suggestion.lng,
+    }));
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setActiveSuggestion(-1);
+    setAddressStatus("Location set from search. The map moved to this address.");
+  }
+
+  function handleAddressKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (!showSuggestions || suggestions.length === 0) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveSuggestion((current) => (current + 1) % suggestions.length);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveSuggestion(
+        (current) => (current - 1 + suggestions.length) % suggestions.length,
+      );
+    } else if (event.key === "Enter") {
+      if (activeSuggestion >= 0 && activeSuggestion < suggestions.length) {
+        event.preventDefault();
+        selectSuggestion(suggestions[activeSuggestion]);
+      }
+    } else if (event.key === "Escape") {
+      setShowSuggestions(false);
+    }
+  }
 
   async function handleLocationChange(lat: number, lng: number) {
     setValues((current) => ({ ...current, lat, lng }));
@@ -85,6 +164,7 @@ export default function ContactForm({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setShowSuggestions(false);
     setError("");
     setLoading(true);
 
@@ -176,7 +256,7 @@ export default function ContactForm({
         />
       </div>
 
-      <div className="sm:col-span-2">
+      <div className="relative sm:col-span-2">
         <label
           htmlFor="address"
           className="form-label"
@@ -192,8 +272,33 @@ export default function ContactForm({
               address: event.target.value,
             }))
           }
+          onKeyDown={handleAddressKeyDown}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+          placeholder="Type an address, pick a suggestion..."
+          autoComplete="off"
           className="form-input"
         />
+        {showSuggestions && suggestions.length > 0 ? (
+          <ul className="address-suggestions" role="listbox">
+            {suggestions.map((suggestion, index) => (
+              <li key={`${suggestion.lat},${suggestion.lng}`}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={index === activeSuggestion}
+                  className={`address-suggestion${index === activeSuggestion ? " active" : ""}`}
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    selectSuggestion(suggestion);
+                  }}
+                  onMouseEnter={() => setActiveSuggestion(index)}
+                >
+                  {suggestion.address}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
 
       </div>
@@ -202,7 +307,7 @@ export default function ContactForm({
           <div>
             <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Location</p>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-          Click the map to set the contact location.
+          Click the map to set the location, or pick an address suggestion above.
             </p>
           </div>
           <span className="map-status">Optional</span>
@@ -213,7 +318,7 @@ export default function ContactForm({
           onLocationChange={handleLocationChange}
         />
         {addressStatus ? (
-          <p className="mt-3 text-xs text-blue-700">{addressStatus}</p>
+          <p className="mt-3 text-xs text-blue-700 dark:text-blue-400">{addressStatus}</p>
         ) : null}
       </div>
 
