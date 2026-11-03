@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 :root {
+  /* Pin the UI to the light scheme so browsers in dark mode don't
+     recolor the canvas and form controls behind our back. */
+  color-scheme: light;
   --background: #f6f7fb;
   --foreground: #18212f;
   --muted: #687386;
