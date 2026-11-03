@@ -55,6 +55,14 @@ function initialsOf(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+function autoCompleteEmail(value: string): string {
+  const trimmed = value.trim();
+  if (trimmed && !trimmed.includes("@") && !trimmed.includes(" ")) {
+    return `${trimmed}@gmail.com`;
+  }
+  return value;
+}
+
 export default function ContactForm({
   initialValues,
   submitLabel,
@@ -313,9 +321,25 @@ export default function ContactForm({
             id="email"
             type="email"
             value={values.email}
+            placeholder="name@gmail.com"
             onChange={(event) =>
               setValues((current) => ({ ...current, email: event.target.value }))
             }
+            onBlur={(event) =>
+              setValues((current) => ({
+                ...current,
+                email: autoCompleteEmail(event.target.value),
+              }))
+            }
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !values.email.includes("@")) {
+                event.preventDefault();
+                setValues((current) => ({
+                  ...current,
+                  email: autoCompleteEmail(current.email),
+                }));
+              }
+            }}
             className={`form-input${values.email ? " pr-11" : ""}`}
           />
           {values.email ? (
