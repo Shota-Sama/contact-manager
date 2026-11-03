@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import Clock from "@/components/Clock";
 
 export default function Home() {
   return (
@@ -13,6 +14,9 @@ export default function Home() {
             <p className="subtle-copy mt-3 max-w-xl text-lg">
               Keep the people you need close, organized, and easy to find.
             </p>
+            <div className="mt-4">
+              <Clock />
+            </div>
           </div>
         </div>
 
