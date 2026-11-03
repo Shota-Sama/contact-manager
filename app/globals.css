@@ -499,3 +499,18 @@ select.form-input {
   border-color: rgb(37 99 235 / 25%);
   border-top-color: var(--brand);
 }
+
+/* Smooth fade-in on every route change */
+.page-transition {
+  animation: page-fade 180ms ease-out;
+}
+
+@keyframes page-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition { animation: none; }
+  .top-progress-active { animation: none; width: 85%; }
+}

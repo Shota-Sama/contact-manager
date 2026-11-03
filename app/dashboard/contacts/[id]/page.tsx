@@ -60,7 +60,6 @@ export default function EditContactPage() {
     }
 
     router.push("/dashboard");
-    router.refresh();
   }
 
   async function handleDelete() {
@@ -74,7 +73,6 @@ export default function EditContactPage() {
     }
 
     router.push("/dashboard");
-    router.refresh();
   }
 
   if (loading) {

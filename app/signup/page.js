@@ -35,8 +35,7 @@ export default function SignUp() {
       }
 
       router.push("/dashboard");
-      router.refresh();
-    } catch (submitError) {
+      } catch (submitError) {
       setError(
         submitError instanceof Error
           ? submitError.message
