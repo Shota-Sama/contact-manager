@@ -96,6 +96,7 @@ export default function SignUp() {
               id="password"
               type="password"
               name="password"
+              autoComplete="new-password"
               required
               minLength={6}
               className="form-input"
@@ -103,7 +104,7 @@ export default function SignUp() {
           </div>
 
           {error ? (
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
           ) : null}
 
           <button

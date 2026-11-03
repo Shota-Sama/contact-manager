@@ -8,7 +8,7 @@ const DEFAULT_CENTER: [number, number] = [14.5995, 120.9842];
 const ContactMap = dynamic(() => import("./ContactMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-64 items-center justify-center rounded-md border border-zinc-300 bg-zinc-100 text-sm text-zinc-500 dark:border-zinc-600 dark:bg-zinc-800">
+    <div className="flex h-64 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-500">
       Loading map...
     </div>
   ),
@@ -235,7 +235,7 @@ export default function ContactForm({
             type="button"
             onClick={handleDelete}
             disabled={loading}
-            className="rounded-md border border-red-300 px-4 py-2 font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+            className="rounded-md border border-red-300 px-4 py-2 font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
           >
             Delete
           </button>
