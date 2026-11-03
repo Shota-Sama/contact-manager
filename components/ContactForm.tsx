@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
 import Spinner from "./Spinner";
+import ConfirmDialog from "./ConfirmDialog";
 
 const DEFAULT_CENTER: [number, number] = [14.5995, 120.9842];
 
@@ -74,6 +75,8 @@ export default function ContactForm({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const [copiedField, setCopiedField] = useState("");
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const latestLookup = useRef(0);
   const latestSearch = useRef(0);
   const lastLookupAt = useRef(0);
@@ -242,15 +245,13 @@ export default function ContactForm({
 
   async function handleDelete() {
     if (!onDelete) return;
-    if (!window.confirm("Delete this contact?")) return;
-
-    setError("");
+    setDeleteError("");
     setLoading(true);
 
     try {
       await onDelete();
     } catch (deleteError) {
-      setError(
+      setDeleteError(
         deleteError instanceof Error
           ? deleteError.message
           : "Unable to delete contact.",
@@ -468,7 +469,7 @@ export default function ContactForm({
         {onDelete ? (
           <button
             type="button"
-            onClick={handleDelete}
+            onClick={() => setConfirmingDelete(true)}
             disabled={loading}
             className="rounded-md border border-red-300 px-4 py-2 font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
           >
@@ -476,6 +477,17 @@ export default function ContactForm({
           </button>
         ) : null}
       </div>
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Delete contact"
+        message="This contact will be permanently removed. This action cannot be undone."
+        confirmLabel="Delete contact"
+        busy={loading}
+        error={deleteError}
+        onCancel={() => setConfirmingDelete(false)}
+        onConfirm={() => void handleDelete()}
+      />
     </form>
   );
 }
