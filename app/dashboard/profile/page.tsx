@@ -31,9 +31,12 @@ export default function ProfilePage() {
           fetch("/api/auth/me"),
           fetch("/api/contacts"),
         ]);
-        if (!meResponse.ok) {
+        if (meResponse.status === 401) {
           router.replace("/login");
           return;
+        }
+        if (!meResponse.ok) {
+          throw new Error("Unable to load your profile right now.");
         }
         const { user } = await meResponse.json();
         setName(user.name);

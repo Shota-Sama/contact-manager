@@ -39,9 +39,12 @@ export default function DashboardPage() {
           fetch("/api/contacts"),
         ]);
 
-        if (!meResponse.ok) {
+        if (meResponse.status === 401) {
           router.replace("/login");
           return;
+        }
+        if (!meResponse.ok) {
+          throw new Error("Unable to load your account right now.");
         }
 
         const meData = await meResponse.json();
