@@ -99,6 +99,9 @@ export default function DashboardPage() {
 
         <div className="flex flex-wrap gap-3">
           <ThemeToggle />
+          <Link href="/dashboard/timer" className="secondary-button action-button">
+            ⏱ Timer
+          </Link>
           <Link href="/dashboard/profile" className="secondary-button action-button">
             Profile
           </Link>
