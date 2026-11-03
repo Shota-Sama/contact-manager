@@ -413,3 +413,27 @@ select.form-input {
   padding-right: 2.2rem;
   cursor: pointer;
 }
+
+.copy-button {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-mid);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+
+.copy-button:hover {
+  background: var(--surface-alt);
+  color: var(--brand);
+}

@@ -7,7 +7,7 @@ import ContactForm from "@/components/ContactForm";
 export default function NewContactPage() {
   const router = useRouter();
 
-  async function handleSubmit(values: {
+  async function createContact(values: {
     name: string;
     email: string;
     phone: string;
@@ -25,14 +25,17 @@ export default function NewContactPage() {
     if (!response.ok) {
       throw new Error(data.error || "Unable to create contact.");
     }
+  }
 
+  async function handleSubmit(values: Parameters<typeof createContact>[0]) {
+    await createContact(values);
     router.push("/dashboard");
     router.refresh();
   }
 
   return (
     <div className="app-shell flex-1 px-4 py-10">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <div>
         <Link
           href="/dashboard"
@@ -46,7 +49,7 @@ export default function NewContactPage() {
       </div>
 
       <div className="contact-editor">
-        <aside className="contact-editor-aside">
+        <aside className="contact-editor-aside self-start sm:sticky sm:top-8">
           <span className="feature-icon">+</span>
           <h2 className="mt-4 text-lg font-semibold text-slate-800 dark:text-slate-100">Contact details</h2>
           <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">A name is all you need. Email, phone, address, and a map pin are optional.</p>
@@ -56,7 +59,11 @@ export default function NewContactPage() {
           </div>
         </aside>
         <div className="contact-editor-form">
-        <ContactForm submitLabel="Create Contact" onSubmit={handleSubmit} />
+        <ContactForm
+          submitLabel="Create Contact"
+          onSubmit={handleSubmit}
+          onSaveAndContinue={createContact}
+        />
         </div>
       </div>
       </div>
