@@ -87,6 +87,16 @@ public sealed class MySqlContactRepository(IConfiguration configuration) : ICont
         return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
     }
 
+    public async Task DeleteAllForUserAsync(string userId, CancellationToken cancellationToken)
+    {
+        const string sql = "DELETE FROM `shan_contact`.`contact_manager_contacts` WHERE account_uuid = @userId;";
+        await using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+        await using var command = new MySqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@userId", userId);
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
     private async Task<int> ExecuteContactCommandAsync(string sql, Contact contact, CancellationToken cancellationToken)
     {
         await using var connection = new MySqlConnection(_connectionString);

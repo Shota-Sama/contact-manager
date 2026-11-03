@@ -563,3 +563,60 @@ select.form-input {
   text-transform: uppercase;
   color: var(--brand);
 }
+
+/* Confirm dialog */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(15 23 42 / 45%);
+  backdrop-filter: blur(2px);
+}
+
+.dialog-panel {
+  width: 100%;
+  max-width: 26rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  padding: 1.5rem;
+  box-shadow: 0 20px 48px rgb(15 23 42 / 22%);
+}
+
+.dark .dialog-panel {
+  box-shadow: 0 20px 48px rgb(0 0 0 / 60%);
+}
+
+/* Danger actions */
+.danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.625rem;
+  padding: 0.7rem 1rem;
+  font-weight: 650;
+  background: #dc2626;
+  color: #fff;
+  transition: background 150ms, transform 150ms;
+}
+
+.danger-button:hover { background: #b91c1c; }
+.danger-button:active { transform: translateY(1px); }
+.danger-button:disabled { cursor: not-allowed; opacity: 0.6; }
+
+.danger-button .spinner {
+  border-color: rgb(255 255 255 / 35%);
+  border-top-color: #fff;
+  margin-right: 0.5rem;
+}
+
+.danger-zone {
+  border: 1px solid var(--danger-border);
+  background: var(--danger-bg);
+  border-radius: 0.875rem;
+  padding: 1.25rem;
+}

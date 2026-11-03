@@ -91,6 +91,20 @@ public sealed class MySqlAccountUserRepository(IConfiguration configuration)
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
+    public async Task<bool> DeleteAsync(string id, CancellationToken cancellationToken)
+    {
+        const string sql = """
+            DELETE FROM `shan_contact`.`app_account_users`
+            WHERE account_uuid = @id;
+            """;
+
+        await using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+        await using var command = new MySqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@id", id);
+        return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
+    }
+
     private static AccountUser ReadUser(MySqlDataReader reader) => new(
         reader.GetString("account_uuid"),
         reader.GetString("full_display_name"),

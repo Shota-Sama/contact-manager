@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import Spinner from "@/components/Spinner";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -23,6 +24,9 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     async function loadProfile() {
@@ -79,6 +83,29 @@ export default function ProfilePage() {
       setError(submitError instanceof Error ? submitError.message : "Unable to update your profile.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDeleteAccount(currentPassword: string) {
+    setDeleting(true);
+    setDeleteError("");
+
+    try {
+      const response = await fetch("/api/auth/account", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to delete your account.");
+
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.replace("/signup");
+    } catch (deleteErr) {
+      setDeleteError(
+        deleteErr instanceof Error ? deleteErr.message : "Unable to delete your account.",
+      );
+      setDeleting(false);
     }
   }
 
@@ -168,7 +195,39 @@ export default function ProfilePage() {
             </button>
           </form>
         </section>
+
+        {/* Danger zone */}
+        <section className="danger-zone mt-5 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-red-700 dark:text-red-400">Danger zone</p>
+            <p className="mt-1 text-sm" style={{ color: "var(--danger-text)" }}>
+              Permanently delete your account and all of your contacts. This cannot be undone.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setDeleteError("");
+              setConfirmingDelete(true);
+            }}
+            className="danger-button action-button"
+          >
+            Delete account
+          </button>
+        </section>
       </div>
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        title="Delete account"
+        message="This will permanently delete your account and every contact you own. Enter your current password to confirm."
+        confirmLabel="Delete my account"
+        requirePassword
+        busy={deleting}
+        error={deleteError}
+        onCancel={() => setConfirmingDelete(false)}
+        onConfirm={(password) => void handleDeleteAccount(password)}
+      />
     </main>
   );
 }

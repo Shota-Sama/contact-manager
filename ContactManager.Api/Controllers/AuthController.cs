@@ -1,12 +1,13 @@
 using BCrypt.Net;
 using ContactManager.Api.AccountModules;
+using ContactManager.Api.ContactModules;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ContactManager.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class AuthController(IAccountUserRepository users) : ControllerBase
+public sealed class AuthController(IAccountUserRepository users, IContactRepository contacts) : ControllerBase
 {
     [HttpPost("signup")]
     public async Task<ActionResult<AccountResponse>> SignUp(
@@ -118,6 +119,25 @@ public sealed class AuthController(IAccountUserRepository users) : ControllerBas
         return Ok(ToResponse(updatedUser));
     }
 
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteAccount(
+        string id,
+        [FromBody] DeleteAccountRequest request,
+        CancellationToken cancellationToken)
+    {
+        var user = await users.FindByIdAsync(id, cancellationToken);
+        if (user is null) return NotFound();
+        if (string.IsNullOrWhiteSpace(request.CurrentPassword) ||
+            !BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+        {
+            return Unauthorized(new { error = "Your current password is incorrect." });
+        }
+
+        await contacts.DeleteAllForUserAsync(id, cancellationToken);
+        await users.DeleteAsync(id, cancellationToken);
+        return NoContent();
+    }
+
     private static AccountResponse ToResponse(AccountUser user) => new(
         user.Id, user.Name, user.Email, user.CreatedAt);
 }
@@ -125,4 +145,5 @@ public sealed class AuthController(IAccountUserRepository users) : ControllerBas
 public sealed record SignUpRequest(string? Name, string? Email, string? Password);
 public sealed record LoginRequest(string? Email, string? Password);
 public sealed record UpdateProfileRequest(string? Name, string? Email, string? CurrentPassword, string? NewPassword);
+public sealed record DeleteAccountRequest(string? CurrentPassword);
 public sealed record AccountResponse(string Id, string Name, string Email, DateTime CreatedAt);
