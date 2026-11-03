@@ -47,3 +47,6 @@ ContactManager.Api/conn.env
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local smoke-test mock
+*.local.js

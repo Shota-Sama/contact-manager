@@ -317,6 +317,10 @@ input {
 .text-link:hover { text-decoration: underline; }
 
 @media (max-width: 640px) {
+  .auth-card {
+    padding: 1.5rem;
+  }
+
   .home-hero,
   .contact-editor-aside,
   .contact-editor-form {
@@ -373,4 +377,39 @@ input {
 
 .address-suggestion.active {
   box-shadow: inset 3px 0 0 var(--brand);
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 1rem;
+  line-height: 1;
+  transition: background 150ms, transform 150ms, box-shadow 150ms;
+}
+
+.icon-button:hover {
+  background: var(--surface-alt);
+  box-shadow: 0 4px 12px rgb(37 99 235 / 16%);
+  transform: translateY(-1px);
+}
+
+.icon-button:focus-visible {
+  outline: 3px solid rgb(37 99 235 / 22%);
+  outline-offset: 2px;
+}
+
+select.form-input {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-mid) 50%), linear-gradient(135deg, var(--text-mid) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 2.2rem;
+  cursor: pointer;
 }
