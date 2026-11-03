@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ContactForm from "@/components/ContactForm";
 import type { Contact } from "@/lib/types";
+import { timeAgo } from "@/lib/format";
 
 export default function EditContactPage() {
   const router = useRouter();
@@ -113,6 +114,12 @@ export default function EditContactPage() {
           <p className="mt-1 text-slate-500 dark:text-slate-400">
             {contact.createdByName || "Unknown user"}
             {contact.createdByEmail ? ` · ${contact.createdByEmail}` : ""}
+          </p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+            Added {timeAgo(contact.createdAt)}
+            {contact.updatedAt !== contact.createdAt
+              ? ` · updated ${timeAgo(contact.updatedAt)}`
+              : ""}
           </p>
         </div>
         <ContactForm
