@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import TopProgress from "@/components/TopProgress";
 
 export const metadata: Metadata = {
   title: "Contact Manager",
@@ -24,7 +25,10 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <TopProgress />
+        {children}
+      </body>
     </html>
   );
 }

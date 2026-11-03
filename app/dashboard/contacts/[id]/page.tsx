@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import ContactForm from "@/components/ContactForm";
 import type { Contact } from "@/lib/types";
 import { timeAgo } from "@/lib/format";
+import Spinner from "@/components/Spinner";
 
 export default function EditContactPage() {
   const router = useRouter();
@@ -78,8 +79,9 @@ export default function EditContactPage() {
 
   if (loading) {
     return (
-      <div className="subtle-copy flex flex-1 items-center justify-center">
-        Loading contact...
+      <div className="flex flex-1 flex-col items-center justify-center gap-3">
+        <Spinner className="spinner-lg" label="Loading contact" />
+        <p className="subtle-copy text-sm">Loading contact...</p>
       </div>
     );
   }

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import type { Contact } from "@/lib/types";
 import { timeAgo } from "@/lib/format";
 import ThemeToggle from "@/components/ThemeToggle";
+import Spinner from "@/components/Spinner";
 import Clock from "@/components/Clock";
 
 type SortOrder = "recent" | "az" | "updated";
@@ -78,8 +79,9 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="subtle-copy flex flex-1 items-center justify-center">
-        Loading dashboard...
+      <div className="flex flex-1 flex-col items-center justify-center gap-3">
+        <Spinner className="spinner-lg" label="Loading dashboard" />
+        <p className="subtle-copy text-sm">Loading dashboard...</p>
       </div>
     );
   }
