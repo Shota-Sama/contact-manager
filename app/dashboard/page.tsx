@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import type { Contact } from "@/lib/types";
 import { timeAgo } from "@/lib/format";
 import ThemeToggle from "@/components/ThemeToggle";
+import Clock from "@/components/Clock";
 
 type SortOrder = "recent" | "az" | "updated";
 
@@ -97,11 +98,10 @@ export default function DashboardPage() {
           </p>
         </div>
 
+        <Clock className="hidden text-right sm:block" />
+
         <div className="flex flex-wrap gap-3">
           <ThemeToggle />
-          <Link href="/dashboard/timer" className="secondary-button action-button">
-            ⏱ Timer
-          </Link>
           <Link href="/dashboard/profile" className="secondary-button action-button">
             Profile
           </Link>
